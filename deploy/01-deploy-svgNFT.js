@@ -8,37 +8,30 @@ const { deveplomentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 const fs = require("fs");
 
-
 module.exports = async function ({ getNamedAccounts, deployments }) {
-    const { deploy, log } = deployments;
-    const { deployer } = await getNamedAccounts();
+	const { deploy, log } = deployments;
+	const { deployer } = await getNamedAccounts();
 
-    const chainId = network.config.chainId;
+	const chainId = network.config.chainId;
 
-   
-    log("------------------------Trying to Deploy-------------------------");
+	log("------------------------Trying to Deploy-------------------------");
 
-    const args = []
+	const args = [];
 
-    const sampleNFT = await deploy("SVGNFT", {
-        from: deployer,
-        log: true,
-        args: args,
-        waitConfirmations: network.config.blockConfirmations || 1,
-    })
+	const sampleNFT = await deploy("SVGNFT", {
+		from: deployer,
+		log: true,
+		args: args,
+		waitConfirmations: network.config.blockConfirmations || 1,
+	});
 
-    console.log("----------------------Deployed Successfully----------------------");
+	console.log("----------------------Deployed Successfully----------------------");
 
-
-
-
-    if (!deveplomentChains.includes(hre.network.name) && process.env.ETHERSCAN_API_KEY) {
-        log("----------------------Trying to Verify the contract----------------------");
-        await verify(sampleNFT.address);
-        log("----------------------Verified the Contract Successfully----------------------");
-    }
-
-}
-
+	if (!deveplomentChains.includes(hre.network.name) && process.env.ETHERSCAN_API_KEY) {
+		log("----------------------Trying to Verify the contract----------------------");
+		await verify(sampleNFT.address);
+		log("----------------------Verified the Contract Successfully----------------------");
+	}
+};
 
 module.exports.tags = ["all", "sampleSVG"];
