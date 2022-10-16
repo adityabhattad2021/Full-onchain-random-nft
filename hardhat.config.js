@@ -10,6 +10,7 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 module.exports = {
 	solidity: "0.8.17",
 	defaultNetwork: "hardhat",
+	allowUnlimitedContractSize: true,
 	networks: {
 		hardhat: {
 			chainId: 1337,

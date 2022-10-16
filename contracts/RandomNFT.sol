@@ -134,7 +134,7 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 		uint256 numberOfPthCommands = (_randomNumber % maxNumberOfPathCommands) + 1;
 		pathSVG = "<path d='";
 		for (uint256 i = 0; i < numberOfPthCommands; i++) {
-			uint256 newRandomNumber = uint256(keccak256(abi.encode(_randomNumber, size + 1)));
+			uint256 newRandomNumber = uint256(keccak256(abi.encode(_randomNumber, size + i)));
 			string memory pathCommand = generatePathCommand(newRandomNumber);
 			pathSVG = string(abi.encodePacked(pathSVG, pathCommand));
 		}
@@ -196,5 +196,12 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 				)
 			)
 		);
+	}
+
+
+
+	// Getter functions.
+	function getTokenCounter() public view returns (uint256) {
+		return tokenCounter;
 	}
 }
