@@ -16,7 +16,7 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 		uint256 indexed tokenId,
 		address indexed sender
 	);
-	// event CreatedUnfinishedRandomSVG(uint256 indexed tokenId, uint256 indexed randomNumber);
+	event CreatedUnfinishedRandomSVG(uint256 indexed tokenId, uint256 indexed randomNumber);
 	event CreatedRandomSVG(uint256 indexed tokneId, string indexed tokenURI);
 
 	// SVG Parameters.
@@ -84,12 +84,12 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 		_safeMint(nftOwner, tokenId);
 		tokenIdToRandomNumber[tokenId] = randomNumber;
 
-        finishMint(tokenId);
+        // finishMint(tokenId);
 
-		// emit CreatedUnfinishedRandomSVG(tokenId, randomNumber);
+		emit CreatedUnfinishedRandomSVG(tokenId, randomNumber);
 	}
 
-	function finishMint(uint256 _tokenId) internal {
+	function finishMint(uint256 _tokenId) public {
 		require(
 			bytes(tokenURI(_tokenId)).length <= 0,
 			"Token URI is already all set, cannot change it."
