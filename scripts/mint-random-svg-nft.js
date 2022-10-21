@@ -18,6 +18,7 @@ async function main() {
     
     if (network.config.chainId == "1337") {
         const vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
+        console.log("Function call: fulfillRandomness");
         await vrfCoordinatorV2Mock.fulfillRandomWords(requestId, randomSVGNFT.address);
     }
     

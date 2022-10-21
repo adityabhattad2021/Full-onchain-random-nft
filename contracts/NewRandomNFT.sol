@@ -2,14 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "base64-sol/base64.sol";
 
 import "hardhat/console.sol";
 
-contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
+contract NEWRANDOMNFT is ERC721URIStorage {
 	// Events
 	event RequestedRandomSVG(
 		uint256 indexed requestId,
@@ -26,29 +24,12 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 	string[] public pathCommands;
 	string[] public colors;
 
-	VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
-	bytes32 private immutable i_gasLane;
-	uint64 private immutable i_subscriptionId;
-	uint16 private constant REQUEST_CONFIRMATIONS = 3;
-	uint32 private immutable i_callBackGasLimit;
-	uint32 private constant NUM_WORDS = 1;
 	uint256 private tokenCounter;
 
 	// Mappings
-	mapping(uint256 => address) public requestIdToSender;
-	mapping(uint256 => uint256) public requestIdToTokenId;
 	mapping(uint256 => uint256) public tokenIdToRandomNumber;
 
-	constructor(
-		address vrfCoordinatorV2,
-		bytes32 gasLane,
-		uint64 subscriptionId,
-		uint32 callbackGasLimit
-	) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721("RandomSVGNFT", "randomSVGNFT") {
-		i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
-		i_gasLane = gasLane;
-		i_subscriptionId = subscriptionId;
-		i_callBackGasLimit = callbackGasLimit;
+	constructor() ERC721("RandomSVGNFT", "randomSVGNFT") {
 		tokenCounter = 0;
 		maxNumberOfPaths = 40;
 		maxNumberOfPathCommands = 20;
@@ -57,63 +38,48 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 		colors = ["red", "blue", "green", "yellow", "black", "white"];
 	}
 
-	function createNFT() public returns (uint256 requestId) {
-		requestId = i_vrfCoordinator.requestRandomWords(
-			i_gasLane,
-			i_subscriptionId,
-			REQUEST_CONFIRMATIONS,
-			i_callBackGasLimit,
-			NUM_WORDS
-		);
-		requestIdToSender[requestId] = msg.sender;
+	function createNFT(uint256 randomNumber) public  {
+	
 		uint256 tokenId = tokenCounter;
-		requestIdToTokenId[requestId] = tokenId;
 		tokenCounter += 1;
-
-		emit RequestedRandomSVG(requestId, tokenId, msg.sender);
-	}
-
-	function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
-		internal
-		override
-	{
-		uint256 randomNumber = randomWords[0];
-		address nftOwner = requestIdToSender[requestId];
-		uint256 tokenId = requestIdToTokenId[requestId];
-
-		_safeMint(nftOwner, tokenId);
+		_safeMint(msg.sender, tokenId);
 		tokenIdToRandomNumber[tokenId] = randomNumber;
-
-        // finishMint(tokenId);
-
 		emit CreatedUnfinishedRandomSVG(tokenId, randomNumber);
 	}
+
 
 	function finishMint(uint256 _tokenId) public {
 		require(
 			bytes(tokenURI(_tokenId)).length <= 0,
 			"Token URI is already all set, cannot change it."
 		);
-		require(tokenCounter > _tokenId, "The token Id has not minted yet.");
 		require(
 			tokenIdToRandomNumber[_tokenId] > 0,
 			"No random number found associted with the following token Id"
 		);
 
 		uint256 randomNumber = tokenIdToRandomNumber[_tokenId];
-		console.log("Random number generated: %s", randomNumber);
-
+		console.log("Working 1",randomNumber);
 
 		string memory svg = generateSVG(randomNumber);
+		console.log("Working 1",randomNumber);
+
 		string memory imageURI = svgToImageURI(svg);
+		console.log("Working 1");
+
 		string memory tokenURI = formatTokenURI(imageURI);
+		console.log("Working 1");
+
 
 		_setTokenURI(_tokenId, tokenURI);
+		console.log("Working 1");
+
 		emit CreatedRandomSVG(_tokenId, tokenURI);
 	}
 
 	function generateSVG(uint256 _randomNumber) internal view returns (string memory finalSVG) {
 		uint256 numberOfPaths = (_randomNumber % maxNumberOfPaths) + 1;
+		console.log(_randomNumber);
 		finalSVG = string(
 			abi.encodePacked(
 				"<svg xmlns='http://www.w3.org/2000/svg' height='",
@@ -188,8 +154,8 @@ contract RandomSVGNFT is ERC721URIStorage, VRFConsumerBaseV2 {
 						abi.encodePacked(
 							'{"name":"',
 							name(),
-							'","description":"A full on chain generated random SVG NFT"',
-							'"attributes":[{"randomness":"100%","awesomeness":"100%"}]',
+							'","description":"A full on chain generated random SVG NFT",',
+							'"attributes":[{"randomness":"100%","awesomeness":"100%"}],',
 							'"image":"',
 							imageURI,
 							'"}'
